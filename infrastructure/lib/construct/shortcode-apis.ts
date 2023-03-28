@@ -65,7 +65,7 @@ export class ShortcodeApis extends GenericApi {
 
     private initializeCategoryApis(props: ShortcodeApiProps){
         this.getApi = this.addMethod({
-            functionName: 'shortcode-list',
+            functionName: 'shortcode-get',
             handlerName: 'shortcode-get-handler.ts',
             verb: 'GET',
             resource: props.idResource,

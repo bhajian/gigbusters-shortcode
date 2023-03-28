@@ -4,5 +4,5 @@ export interface ShortcodeGetParams {
 export interface ShortcodeEntity {
     shortcode?: string
     uri: string
-    userId: string
+    type: string
 }

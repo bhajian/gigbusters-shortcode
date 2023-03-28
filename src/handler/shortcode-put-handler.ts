@@ -28,7 +28,6 @@ export async function handler(event: APIGatewayProxyEvent, context: Context):
     try {
         const item = getEventBody(event) as ShortcodeEntity;
         const sub = getSub(event)
-        item.userId = sub
         const res = await service.put(item)
         result.body = JSON.stringify(res)
     } catch (error) {

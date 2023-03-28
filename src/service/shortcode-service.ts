@@ -30,17 +30,26 @@ export class ShortcodeService {
     }
 
     async put(params: ShortcodeEntity): Promise<ShortcodeEntity> {
-        const nanoid = customAlphabet('123', 2)
-        params.shortcode = await nanoid()
-        try{
-            await this.documentClient
-                .put({
-                    TableName: this.props.table,
-                    Item: params,
-                }).promise()
-        } catch (e) {
-            console.log(e)
-            throw e
+        const nanoid = customAlphabet(
+            '1234567890abcdefghijklmnopqrstuvwxyz', 6)
+        let err = undefined
+        for(let retry = 0; retry < 100; retry++){
+            params.shortcode = await nanoid()
+            try{
+                await this.documentClient
+                    .put({
+                        TableName: this.props.table,
+                        Item: params,
+                        ConditionExpression: 'attribute_not_exists(shortcode)'
+                    }).promise()
+                err = undefined
+                break
+            } catch (e) {
+                err = e
+            }
+        }
+        if(err){
+            throw new Error('Collisions in generating short code exceeded 100 times.')
         }
         return params
     }
