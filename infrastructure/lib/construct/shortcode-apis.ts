@@ -8,9 +8,13 @@ import {AuthorizationType} from "@aws-cdk/aws-apigateway";
 import config from "../../config/config";
 import {Table} from "aws-cdk-lib/aws-dynamodb";
 import {UserPool} from "aws-cdk-lib/aws-cognito";
+import {AccountPrincipal, PolicyDocument, PolicyStatement} from "aws-cdk-lib/aws-iam";
+
+
 
 export interface ApiProps {
     dynamoDBTable: GenericDynamoTable
+    account: string
 }
 
 export interface AuthorizerProps {
@@ -25,6 +29,7 @@ export interface ShortcodeApiProps {
     authorizer: CognitoUserPoolsAuthorizer
     rootResource: IResource
     idResource: IResource
+    account: string
 }
 
 export class ShortcodeApis extends GenericApi {
@@ -41,7 +46,7 @@ export class ShortcodeApis extends GenericApi {
             rootDomain: config.rootDomain,
             ARecordId: 'ARecordId',
             basePath: config.basePath,
-            envName: config.envName
+            envName: config.envName,
         })
     }
 
@@ -54,16 +59,16 @@ export class ShortcodeApis extends GenericApi {
         })
 
         const idResource = this.api.root.addResource('{shortcode}')
-        this.initializeCategoryApis({
+        this.initializeShortcodeApis({
             authorizer: authorizer,
             idResource: idResource,
             rootResource: this.api.root,
-            table: props.dynamoDBTable.table
+            table: props.dynamoDBTable.table,
+            account: props.account
         })
-
     }
 
-    private initializeCategoryApis(props: ShortcodeApiProps){
+    private initializeShortcodeApis(props: ShortcodeApiProps){
         this.getApi = this.addMethod({
             functionName: 'shortcode-get',
             handlerName: 'shortcode-get-handler.ts',
@@ -73,8 +78,8 @@ export class ShortcodeApis extends GenericApi {
                 TABLE: props.table.tableName
             },
             validateRequestBody: false,
-            authorizationType: AuthorizationType.COGNITO,
-            authorizer: props.authorizer
+            // authorizationType: AuthorizationType.NONE,
+            // authorizer: props.authorizer
         })
 
         this.putApi = this.addMethod({
@@ -85,14 +90,15 @@ export class ShortcodeApis extends GenericApi {
             environment: {
                 TABLE: props.table.tableName
             },
-            validateRequestBody: true,
-            bodySchema: putShortcodeSchema,
-            authorizationType: AuthorizationType.COGNITO,
-            authorizer: props.authorizer
+            validateRequestBody: false,
+            // bodySchema: putShortcodeSchema,
+            // authorizationType: AuthorizationType.NONE,
+            // authorizer: props.authorizer
         })
 
         props.table.grantFullAccess(this.getApi.grantPrincipal)
         props.table.grantFullAccess(this.putApi.grantPrincipal)
+
     }
 
     protected createAuthorizer(props: AuthorizerProps): CognitoUserPoolsAuthorizer{

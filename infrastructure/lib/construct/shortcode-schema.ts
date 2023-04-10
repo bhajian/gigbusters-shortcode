@@ -9,5 +9,8 @@ export const putShortcodeSchema = {
         uri: {
             type: JsonSchemaType.STRING
         },
+        type: {
+            type: JsonSchemaType.STRING
+        },
     },
 }

@@ -16,6 +16,7 @@ export class ShortcodeApiStack extends Stack {
         super(scope, id, props);
         this.shortcodeApis = new ShortcodeApis(this, id, {
             dynamoDBTable: shortcodeApiProps.shortcodeApiStatefulStack.dynamodbTable,
+            account: this.account
         })
     }
 
